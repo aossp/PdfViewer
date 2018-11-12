@@ -108,7 +108,6 @@ public class PdfViewer extends Activity implements LoaderManager.LoaderCallbacks
         final WebSettings settings = mWebView.getSettings();
         settings.setAllowContentAccess(false);
         settings.setAllowFileAccess(false);
-        settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         settings.setJavaScriptEnabled(true);
         disableSaveFormData(settings);
@@ -119,12 +118,55 @@ public class PdfViewer extends Activity implements LoaderManager.LoaderCallbacks
         mWebView.addJavascriptInterface(mChannel, "channel");
 
         mWebView.setWebViewClient(new WebViewClient() {
+            private WebResourceResponse fromAsset(final String mime, final String path) {
+                try {
+                    InputStream inputStream = getAssets().open(path.substring(1));
+                    return new WebResourceResponse(mime, null, inputStream);
+                } catch (IOException e) {
+                    return null;
+                }
+            }
+
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                if ("GET".equals(request.getMethod()) && "https://localhost/placeholder.pdf".equals(request.getUrl().toString())) {
+                if (!"GET".equals(request.getMethod())) {
+                    return null;
+                }
+
+                final Uri url = request.getUrl();
+                if (!"localhost".equals(url.getHost())) {
+                    return null;
+                }
+
+                final String path = url.getPath();
+                Log.d(TAG, "path " + path);
+
+                if ("/placeholder.pdf".equals(path)) {
                     return new WebResourceResponse("application/pdf", null, mInputStream);
                 }
+
+                if ("/viewer.html".equals(path)) {
+                    return fromAsset("text/html", path);
+                }
+
+                if ("/viewer.css".equals(path)) {
+                    return fromAsset("text/css", path);
+                }
+
+                if ("/viewer.js".equals(path)) {
+                    return fromAsset("application/javascript", path);
+                }
+
+                if ("/pdf.js".equals(path)) {
+                    return fromAsset("application/javascript", path);
+                }
+
+                if ("/pdf.worker.js".equals(path)) {
+                    return fromAsset("application/javascript", path);
+                }
+
                 return null;
+
             }
 
             @Override
@@ -193,7 +235,7 @@ public class PdfViewer extends Activity implements LoaderManager.LoaderCallbacks
         } catch (IOException e) {
             return;
         }
-        mWebView.loadUrl("file:///android_asset/viewer.html");
+        mWebView.loadUrl("https://localhost/viewer.html");
     }
 
     private void renderPage(final boolean lazy) {
