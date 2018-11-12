@@ -43,6 +43,35 @@ public class PdfViewer extends Activity implements LoaderManager.LoaderCallbacks
     private static final String STATE_PROPERTIES = "properties";
     private static final String STATE_JSON_PROPERTIES = "json_properties";
 
+    private static final String CONTENT_SECURITY_POLICY =
+        "default-src 'none'; " +
+        "form-action 'none'; " +
+        "connect-src https://localhost/placeholder.pdf; " +
+        "img-src blob: 'self'; " +
+        "script-src 'self'; " +
+        "style-src 'self'; " +
+        "frame-ancestors 'none'; " +
+        "base-uri 'none'";
+
+    private static final String FEATURE_POLICY =
+        "accelerometer 'none'; " +
+        "ambient-light-sensor 'none'; " +
+        "autoplay 'none'; " +
+        "camera 'none'; " +
+        "encrypted-media 'none'; " +
+        "fullscreen 'none'; " +
+        "geolocation 'none'; " +
+        "gyroscope 'none'; " +
+        "magnetometer 'none'; " +
+        "microphone 'none'; " +
+        "midi 'none'; " +
+        "payment 'none'; " +
+        "picture-in-picture 'none'; " +
+        "speaker 'none'; " +
+        "sync-xhr 'none'; " +
+        "usb 'none'; " +
+        "vr 'none'";
+
     private static final int MIN_ZOOM_LEVEL = 0;
     private static final int MAX_ZOOM_LEVEL = 4;
     private static final int ALPHA_LOW = 130;
@@ -149,7 +178,8 @@ public class PdfViewer extends Activity implements LoaderManager.LoaderCallbacks
                 if ("/viewer.html".equals(path)) {
                     final WebResourceResponse response = fromAsset("text/html", path);
                     HashMap<String, String> headers = new HashMap<String, String>();
-                    headers.put("Content-Security-Policy", "default-src 'none'; form-action 'none'; connect-src https://localhost/placeholder.pdf; img-src blob: 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'");
+                    headers.put("Content-Security-Policy", CONTENT_SECURITY_POLICY);
+                    headers.put("Feature-Policy", FEATURE_POLICY);
                     response.setResponseHeaders(headers);
                     return response;
                 }
