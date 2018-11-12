@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 
 import co.copperhead.pdfviewer.fragment.DocumentPropertiesFragment;
 import co.copperhead.pdfviewer.fragment.JumpToPageFragment;
@@ -146,7 +147,11 @@ public class PdfViewer extends Activity implements LoaderManager.LoaderCallbacks
                 }
 
                 if ("/viewer.html".equals(path)) {
-                    return fromAsset("text/html", path);
+                    final WebResourceResponse response = fromAsset("text/html", path);
+                    HashMap<String, String> headers = new HashMap<String, String>();
+                    headers.put("Content-Security-Policy", "default-src 'none'; form-action 'none'; connect-src https://localhost/placeholder.pdf; img-src blob: 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'");
+                    response.setResponseHeaders(headers);
+                    return response;
                 }
 
                 if ("/viewer.css".equals(path)) {
